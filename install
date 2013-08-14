@@ -1,0 +1,28 @@
+#!/bin/bash
+
+cd /tmp
+URL="redis-2.6.14"
+echo "Downloading..."
+wget http://redis.googlecode.com/files/$URL.tar.gz
+echo "Unpacking..."
+tar -zxvf $URL.tar.gz
+cd $URL
+FLAGS="-march=native -O3 -pipe"
+echo "Compiling..."
+sudo make CFLAGS="$FLAGS" CPPFLAGS="$FLAGS" CCFLAGS="$FLAGS" CXXFLAGS="$FLAGS" install
+echo "Creating upstart script..."
+cat > /etc/init/redis.conf << REDIS_UPSTART
+#!upstart
+description "Redis"
+author      "Amit"
+
+start on startup
+stop on shutdown
+
+script
+    /usr/local/bin/redis-server
+end script
+
+respawn
+REDIS_UPSTART
+sudo start redis
